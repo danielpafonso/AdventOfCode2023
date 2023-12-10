@@ -135,7 +135,7 @@ func main() {
 	if len(os.Args) == 1 {
 		fmt.Println(
 			"usage: go run solve1.go FILE\n\n" +
-				"Solution 1 for day x puzzle.\n\n" +
+				"Solution 1 for day 3 puzzle.\n\n" +
 				"positional arguments:\n" +
 				"  FILE         path for puzzle input file",
 		)
