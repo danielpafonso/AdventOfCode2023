@@ -18,11 +18,27 @@ type Number struct {
 type Symbol struct {
 	row    int
 	column int
+	symbol string
+}
+
+type Position struct {
+	row    int
+	column int
 }
 
 var (
-	numbers = map[int][]Number{}
-	symbols = make([]Symbol, 0)
+	numbers   = map[int][]Number{}
+	symbols   = make([]Symbol, 0)
+	positions = []Position{
+		{-1, -1},
+		{-1, 0},
+		{-1, 1},
+		{0, -1},
+		{0, 1},
+		{1, -1},
+		{1, 0},
+		{1, 1},
+	}
 )
 
 func readInput(filename string) []string {
@@ -39,6 +55,8 @@ func parseData(data []string) {
 	for row, line := range data {
 		buffer := ""
 		start := -1
+		// add final dot to line
+		line += "."
 		for col, r := range line {
 			char := string(r)
 			// check if number
@@ -77,10 +95,39 @@ func parseData(data []string) {
 				continue
 			} else {
 				// symbol
-				symbols = append(symbols, Symbol{row: row, column: col})
+				symbols = append(symbols, Symbol{row: row, column: col, symbol: char})
 			}
 		}
 	}
+}
+
+func getPartNumbers() []int {
+	partNumbers := make([]int, 0)
+
+	for _, sym := range symbols {
+		distinctNumbers := map[int]int{}
+		// get around positions
+		for _, pos := range positions {
+			checkRow := sym.row + pos.row
+			checkColumn := sym.column + pos.column
+			// check if there is a number on that row
+			if nums, ok := numbers[checkRow]; ok {
+				// check if there is a number with that column
+				for _, num := range nums {
+					if checkColumn >= num.start && checkColumn <= num.end {
+						// insert into to distinct columns
+						if _, ok := distinctNumbers[num.id]; !ok {
+							distinctNumbers[num.id] = num.value
+						}
+					}
+				}
+			}
+		}
+		for _, part := range distinctNumbers {
+			partNumbers = append(partNumbers, part)
+		}
+	}
+	return partNumbers
 }
 
 func main() {
@@ -97,8 +144,11 @@ func main() {
 	filepath := os.Args[1]
 	data := readInput(filepath)
 	parseData(data)
-	fmt.Printf("%+v\n", symbols)
-	for k, v := range numbers {
-		fmt.Println(k, v)
+
+	parts := getPartNumbers()
+	sum := 0
+	for _, v := range parts {
+		sum += v
 	}
+	fmt.Printf("Sum of number parts: %d\n", sum)
 }
